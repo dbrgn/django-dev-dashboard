@@ -11,11 +11,10 @@ from .models import Metric
 
 TEN_MINUTES = 60 * 10
 
-@cache_page(TEN_MINUTES)
-def index(request):
+def index(request, filters={}):
     metrics = []
     for MC in Metric.__subclasses__():
-        metrics.extend(MC.objects.filter(show_on_dashboard=True))
+        metrics.extend(MC.objects.filter(**filters))
     metrics = sorted(metrics, key=operator.attrgetter('name'))
 
     data = []
@@ -23,6 +22,14 @@ def index(request):
         latest = metric.data.latest()
         data.append({'metric': metric, 'latest': latest})
     return render(request, 'dashboard/index.html', {'data': data})
+
+@cache_page(TEN_MINUTES)
+def index_explicit(request):
+    return index(request, filters={'show_on_dashboard': True})
+
+@cache_page(TEN_MINUTES)
+def index_all(request):
+    return index(request)
 
 @cache_page(TEN_MINUTES)
 def metric_detail(request, metric_slug):

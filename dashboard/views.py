@@ -9,7 +9,9 @@ from django.forms.models import model_to_dict
 from django.views.decorators.cache import cache_page
 from .models import Metric
 
+
 TEN_MINUTES = 60 * 10
+
 
 def index(request, filters={}):
     metrics = []
@@ -23,13 +25,16 @@ def index(request, filters={}):
         data.append({'metric': metric, 'latest': latest})
     return render(request, 'dashboard/index.html', {'data': data})
 
+
 @cache_page(TEN_MINUTES)
 def index_explicit(request):
     return index(request, filters={'show_on_dashboard': True})
 
+
 @cache_page(TEN_MINUTES)
 def index_all(request):
     return index(request)
+
 
 @cache_page(TEN_MINUTES)
 def metric_detail(request, metric_slug):
@@ -38,6 +43,7 @@ def metric_detail(request, metric_slug):
         'metric': metric,
         'latest': metric.data.latest(),
     })
+
 
 @cache_page(TEN_MINUTES)
 def metric_json(request, metric_slug):
@@ -53,9 +59,10 @@ def metric_json(request, metric_slug):
     doc['data'] = metric.gather_data(since=d)
 
     return http.HttpResponse(
-        simplejson.dumps(doc, indent = 2 if settings.DEBUG else None),
-        content_type = "application/json",
+        simplejson.dumps(doc, indent=2 if settings.DEBUG else None),
+        content_type="application/json",
     )
+
 
 def _find_metric(slug):
     for MC in Metric.__subclasses__():
